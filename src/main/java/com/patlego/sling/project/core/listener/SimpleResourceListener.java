@@ -52,7 +52,7 @@ public class SimpleResourceListener implements EventListener {
         ObservationManager observation = session.getWorkspace().getObservationManager();
 
         logger.info("About to add the event listener");
-        observation.addEventListener(this, Event.NODE_ADDED | Event.PERSIST | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED , "/", true, null, new String[]{"nt:file","nt:unstructured", "nt:base", "rep:User", "sling:Folder"} , true);
+        observation.addEventListener(this, Event.NODE_REMOVED | Event.PROPERTY_REMOVED , "/content/launches", true, null, new String[]{"nt:file","nt:unstructured", "nt:base", "rep:User", "sling:Folder", "cq:Page"} , true);
         logger.info("Added the event listener");
     }
 
