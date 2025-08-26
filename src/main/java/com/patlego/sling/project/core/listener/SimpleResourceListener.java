@@ -21,12 +21,15 @@ import javax.jcr.observation.Event;
 @Component(immediate = true)
 public class SimpleResourceListener implements EventListener {
 
-    Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final String SYSTEM_LISTENER = "systemlistener";
 
-    private Session session;
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Reference
     private SlingRepository repository;
+
+    @SuppressWarnings("AEM Rules:AEM-3") // used for observation
+    private Session session;
 
     @Override
     public void onEvent(EventIterator events) {
@@ -41,19 +44,21 @@ public class SimpleResourceListener implements EventListener {
                 }
             }
         }
-
     }
 
     @Activate
     protected void activate() throws LoginException, RepositoryException {
-        logger.info("!!!!!!Activating {} bundle", this.getClass().getName());
+        try {
+            Session session = this.repository.loginService(SYSTEM_LISTENER, null);
+            ObservationManager observation = session.getWorkspace().getObservationManager();
 
-        this.session = this.repository.loginService("systemlistener", null);
-        ObservationManager observation = session.getWorkspace().getObservationManager();
+            observation.addEventListener(this, Event.NODE_REMOVED | Event.NODE_ADDED,
+                    "/var/sitemaps", true, null,
+                    new String[] { "nt:unstructured", "sling:Folder", "nt:file", }, true);
+        } catch (RepositoryException e) {
+            logger.error("Failed to activate the event listener", e);
+        }
 
-        logger.info("About to add the event listener");
-        observation.addEventListener(this, Event.NODE_REMOVED | Event.PROPERTY_REMOVED , "/content/launches", true, null, new String[]{"nt:file","nt:unstructured", "nt:base", "rep:User", "sling:Folder", "cq:Page"} , true);
-        logger.info("Added the event listener");
     }
 
     @Modified
@@ -64,15 +69,18 @@ public class SimpleResourceListener implements EventListener {
 
     @Deactivate
     protected void deactivate() throws LoginException, RepositoryException {
-        logger.info("Deactivating {} bundle", this.getClass().getName());
-
-        ObservationManager observation = this.session.getWorkspace().getObservationManager();
-
-        logger.info("About to remove the event listener");
-        observation.removeEventListener(this);
-        logger.info("Removed the event listener");
-
-        session.logout();
+        try {
+            ObservationManager observation = session.getWorkspace().getObservationManager();
+            observation.removeEventListener(this);
+            logger.info("Removed the event listener");
+        } catch (RepositoryException e) {
+            logger.error("Unable to successfully deactivate the event listener", e);
+        } finally {
+            if (session != null) {
+                session.logout();
+                session = null;
+            }
+        }
     }
 
 }
