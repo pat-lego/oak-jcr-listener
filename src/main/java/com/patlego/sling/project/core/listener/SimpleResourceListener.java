@@ -33,7 +33,6 @@ public class SimpleResourceListener implements EventListener {
 
     @Override
     public void onEvent(EventIterator events) {
-        logger.info("Something triggered the onEvent listener");
         if (null != events) {
             while (events.hasNext()) {
                 Event event = events.nextEvent();

@@ -1,0 +1,6 @@
+{
+  "scripts":[
+    "create service user systemlistener",
+    "set ACL for systemlistener\r\n    allow jcr:all on /var/sitemaps\r\nend"
+  ]
+}
