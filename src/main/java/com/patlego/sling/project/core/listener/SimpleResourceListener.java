@@ -53,7 +53,7 @@ public class SimpleResourceListener implements EventListener {
 
             observation.addEventListener(this, Event.NODE_REMOVED | Event.NODE_ADDED,
                     "/var/sitemaps", true, null,
-                    new String[] { "nt:unstructured", "sling:Folder", "nt:file", }, true);
+                    new String[] { "nt:unstructured", "sling:Folder", "nt:file" }, true);
         } catch (RepositoryException e) {
             logger.error("Failed to activate the event listener", e);
         }
